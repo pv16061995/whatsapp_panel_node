@@ -1,0 +1,7 @@
+/node_modules
+/public/uploads
+npm-debug.log
+package-lock.json
+/logs
+.env
+/.vscode
