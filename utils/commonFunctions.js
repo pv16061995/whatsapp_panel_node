@@ -1,3 +1,4 @@
+const multer = require("multer");
 const { collectionData } = require("./constants");
 
 exports.getTableDetails = (tableName) => {
@@ -76,3 +77,33 @@ exports.getSchema = (getTableDetails) => {
     freezeTableName: true,
   });
 };
+
+exports.findDuplicateContacts = (contacts) => {
+  const seen = new Set();
+  const duplicates = [];
+
+  for (const contact of contacts) {
+    const key = `${contact.phone}-${contact.email}`; // combine fields to make unique key
+    if (seen.has(key)) {
+      duplicates.push(contact);
+    } else {
+      seen.add(key);
+    }
+  }
+
+  return duplicates;
+};
+
+const multerStrorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./uploads");
+  },
+  filename: function (req, file, cb) {
+    let extArray = file.mimetype.split("/");
+    let exArr = file.originalname.split(".");
+    let extension = exArr[exArr.length - 1];
+    cb(null, file.fieldname + "-" + Date.now() + "." + extension);
+  },
+});
+
+exports.multerUpload = multer({ storage: multerStrorage });

@@ -3,8 +3,7 @@ const controller = require("../controllers/common");
 const router = express.Router();
 const responseHandler = require("../lib/responseHandler");
 const commonFunctions = require("../utils/commonFunctions");
-
-const { signup, login } = require("../controllers/common");
+const constants = require("../utils/constants");
 
 router.post("/login", async (req, res) => {
   try {
@@ -169,6 +168,30 @@ router.post("/delete", async (req, res) => {
       reqBody.reqBody,
       getTableDetails
     );
+    return res
+      .status(200)
+      .json(
+        responseHandler(responseBody, "Data has been deleted successfully!!!")
+      );
+  } catch (error) {
+    let { httpCode, responseBody } = error;
+    if (httpCode) {
+      return res.status(httpCode).json(responseBody);
+    }
+    return res.status(400).json(responseHandler("", error.message));
+  }
+});
+
+router.post("/getUserTypesByType", async (req, res) => {
+  try {
+    let queryConstant = "GETUSERTYPRES";
+    const query = constants.RAWQUERIES[queryConstant];
+
+    let reqBody = req.body;
+
+    if (!query) throw { message: "Something Went Wrong" };
+
+    let responseBody = await controller.filtersByRaw(reqBody.reqBody, query);
     return res
       .status(200)
       .json(

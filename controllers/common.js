@@ -1,7 +1,6 @@
 const dao = require("../dao/common");
 const { FILTERS } = require("../utils/constants");
 const jwt = require("jsonwebtoken");
-
 const {
   parseCondition,
   parseConditionMysql,
@@ -23,6 +22,7 @@ exports.aggregate = async (reqBody, getTableDetails) => {
   let key = FILTERS[filterKeyUpper];
   let filterObject = { $match: {} };
   filterObject["$match"][key] = [];
+
   console.log("reqBody>>>", filterObject);
   let filterObjectKey = filterObject["$match"][key];
   let i = 0;
@@ -45,37 +45,22 @@ exports.aggregate = async (reqBody, getTableDetails) => {
 };
 
 exports.delete = async (reqBody, getTableDetails) => {
-  let filter = {};
-  if (process.env.DB_TYPE == "MONGO") {
-    filter = parseCondition(reqBody);
-  } else if (process.env.DB_TYPE == "MYSQL") {
-    filter = parseConditionMysql(reqBody);
-  }
+  const filter = parseConditionMysql(reqBody);
   return await dao.removeData(filter, getTableDetails);
 };
 
 exports.updateData = async (reqBody, getTableDetails, filter) => {
-  let filterBody = {};
-  if (process.env.DB_TYPE == "MONGO") {
-    filterBody = parseCondition(filter);
-  } else if (process.env.DB_TYPE == "MYSQL") {
-    filterBody = parseConditionMysql(filter);
-  }
-  console.log("filterBody >>>", filterBody);
-  return await dao.updateData(reqBody, getTableDetails, filterBody);
+  // const filterBody = parseConditionMysql(filter);
+  // console.log("filterBody >>>", filterBody);
+  return await dao.updateData(reqBody, getTableDetails, filter);
 };
 
 exports.filters = async (filter, getTableDetails) => {
-  let filterBody = {};
-  if (Object.keys(filter).length > 0) {
-    if (process.env.DB_TYPE == "MONGO") {
-      filterBody = parseCondition(filter);
-    } else if (process.env.DB_TYPE == "MYSQL") {
-      filterBody = parseConditionMysqlFilter(filter);
-    }
-  }
+  const filterBody = parseConditionMysqlFilter(filter);
+
   return await dao.filters(filterBody, getTableDetails);
 };
+
 exports.login = async (filter, getTableDetails) => {
   let user = await dao.filters(filter, getTableDetails);
 
@@ -91,4 +76,8 @@ exports.login = async (filter, getTableDetails) => {
     user["dataValues"]["token"] = token;
   }
   return user;
+};
+
+exports.filtersByRaw = async (filter, query) => {
+  return await dao.rawQuery(query, filter);
 };

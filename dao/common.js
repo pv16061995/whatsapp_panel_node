@@ -1,9 +1,17 @@
 const commonFunctions = require("../utils/commonFunctions");
+const Sequelize = require("sequelize");
+const db = require("../config/mysql");
+const { parseConditionMysql } = require("../utils/commonFunctions");
 
 exports.saveData = async (obj, getTableDetails) => {
   let models = commonFunctions.getSchema(getTableDetails);
-  const data = new models(obj);
-  return await data.save();
+
+  if (Array.isArray(obj)) {
+    return await models.bulkCreate(obj, { validate: true });
+  } else {
+    const data = new models(obj);
+    return await data.save();
+  }
 };
 
 exports.aggregate = async (obj, getTableDetails) => {
@@ -18,14 +26,25 @@ exports.removeData = async (obj, getTableDetails) => {
 };
 
 exports.updateData = async (reqBody, getTableDetails, filter) => {
+  const filterBody = parseConditionMysql(filter);
   let models = commonFunctions.getSchema(getTableDetails);
-  await models.update(reqBody, filter);
+  await models.update(reqBody, filterBody);
   console.log("reqBody>>", reqBody);
   return await models.findAll({ where: reqBody });
+  // return await models.findAll(filterBody);
 };
 
 exports.filters = async (filter, getTableDetails) => {
   let models = commonFunctions.getSchema(getTableDetails);
   console.log("reqBody>>", filter);
   return await models.findAll({ where: filter });
+};
+
+exports.rawQuery = async (query, params) => {
+  const data = await db.query(query, {
+    replacements: params,
+    type: Sequelize.QueryTypes.SELECT,
+  });
+
+  return data;
 };
