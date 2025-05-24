@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/pv16061995/whatsapp_panel_node#readme",
   "dependencies": {
+    "axios": "^1.9.0",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "csv-parser": "^3.2.0",

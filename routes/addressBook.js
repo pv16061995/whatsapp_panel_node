@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const responseHandler = require("../lib/responseHandler");
 const commonFunctions = require("../utils/commonFunctions");
-const multer = require("multer");
 const csv = require("csv-parser");
 const XLSX = require("xlsx");
 const fs = require("fs");
@@ -26,9 +25,7 @@ router.post("/upload", multerUpload.single("file"), async (req, res) => {
     }
 
     if (!file) {
-      const error = new Error("Please upload a file");
-      error.httpStatusCode = 400;
-      return next(error);
+      return res.status(400).json({ message: "Please upload a file" });
     }
 
     const ext = file.filename.split(".")[1];
