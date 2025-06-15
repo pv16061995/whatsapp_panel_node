@@ -196,12 +196,61 @@ exports.collectionData = {
       name: { type: Sequelize.STRING },
       language: { type: Sequelize.STRING },
       category: { type: Sequelize.STRING },
-      header: { type: Sequelize.TEXT },
-      body: { type: Sequelize.TEXT },
-      footer: { type: Sequelize.TEXT },
-      buttons: { type: Sequelize.TEXT },
+      header: {
+        type: Sequelize.TEXT,
+        get() {
+          const rawValue = this.getDataValue("header");
+          return rawValue ? JSON.parse(rawValue) : null;
+        },
+        set(value) {
+          this.setDataValue("header", JSON.stringify(value));
+        },
+      },
+      body: {
+        type: Sequelize.TEXT,
+        get() {
+          const rawValue = this.getDataValue("body");
+          return rawValue ? JSON.parse(rawValue) : null;
+        },
+        set(value) {
+          this.setDataValue("body", JSON.stringify(value));
+        },
+      },
+      footer: {
+        type: Sequelize.TEXT,
+        get() {
+          const rawValue = this.getDataValue("footer");
+          return rawValue ? JSON.parse(rawValue) : null;
+        },
+        set(value) {
+          this.setDataValue("footer", JSON.stringify(value));
+        },
+      },
+      buttons: {
+        type: Sequelize.TEXT,
+        get() {
+          const rawValue = this.getDataValue("buttons");
+          return rawValue ? JSON.parse(rawValue) : null;
+        },
+        set(value) {
+          this.setDataValue("buttons", JSON.stringify(value));
+        },
+      },
       status: { type: Sequelize.STRING, defaultValue: "1" },
       approval_status: { type: Sequelize.INTEGER, defaultValue: "0" },
+      waba_temp_id: { type: Sequelize.STRING, defaultValue: "" },
+      waba_status: { type: Sequelize.STRING, defaultValue: "" },
+    },
+    validator: {},
+  },
+  LANGUAGE_TEMPLATE: {
+    tableName: "language_template",
+    schema: {
+      id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+      name: { type: Sequelize.STRING },
+      code: { type: Sequelize.STRING },
+      type: { type: Sequelize.INTEGER },
+      status: { type: Sequelize.INTEGER, defaultValue: "1" },
     },
     validator: {},
   },
@@ -229,4 +278,9 @@ fund_transactions ft
 left join users sen on sen.id = ft.sender_id
 left join users rec on rec.id = ft.receiver_id
 where ft.sender_id = :userId or ft.receiver_id = :userId order by ft.created_date desc`,
+  GETTEMPLATEDETAILS: `select temp.*,lang.code,cat.name as category_name from 
+  templates as temp 
+  left join language_template as lang on temp.language = lang.id 
+  left join whatsapp_template_categories as cat on temp.category = cat.id 
+  where temp.id = :id`,
 };

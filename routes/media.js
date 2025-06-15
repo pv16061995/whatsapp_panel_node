@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const router = express.Router();
 const responseHandler = require("../lib/responseHandler");
 const commonFunctions = require("../utils/commonFunctions");
@@ -14,6 +15,7 @@ router.post("/upload", multerUpload.single("file"), async (req, res) => {
   try {
     const file = req.file;
     const reqBody = req.body;
+    console.log("file>>", file);
     if (!file) throw new Error("No file received");
 
     const getMediaTableDetails =
@@ -32,10 +34,12 @@ router.post("/upload", multerUpload.single("file"), async (req, res) => {
     );
 
     const formData = new FormData();
-    formData.append("file", fs.createReadStream(file.path));
+    const dirName = __dirname.replace("routes", "");
+    const filePath = path.join(dirName, file.path);
+    formData.append("file", fs.createReadStream(filePath));
     formData.append("type", file.mimetype); // required!
     formData.append("messaging_product", "whatsapp"); // required!
-
+    console.log("formData>>", filePath);
     const WA_URL = `${process.env.WA_API_URL}${process.env.WA_VERSION}/${process.env.WA_PHONE}/media`;
 
     const waRes = await axios.post(WA_URL, formData, {
